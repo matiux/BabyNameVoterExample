@@ -2,6 +2,7 @@ import 'package:baby_name_voter/app_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NameListWidget extends StatefulWidget {
   @override
@@ -26,7 +27,19 @@ class _NameListWidgetStatus extends State<NameListWidget> {
     });
   }
 
-  _voteName(DocumentReference dr, BuildContext context, AppStateModel appStateModel) {
+  _voteName(DocumentSnapshot ds, BuildContext context, AppStateModel appStateModel) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    bool voted = prefs.getBool('voted.' + ds['name']) ?? false;
+
+    if (voted) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text("Hai già votato " + ds['name']),
+        duration: Duration(milliseconds: 1000),
+      ));
+      return;
+    }
+
     if ("ConnectivityResult.none" == appStateModel.connectionStatus()) {
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text("No internet connection"),
@@ -37,8 +50,10 @@ class _NameListWidgetStatus extends State<NameListWidget> {
     }
 
     Firestore.instance.runTransaction((transaction) async {
-      DocumentSnapshot freshSnap = await transaction.get(dr);
+      DocumentSnapshot freshSnap = await transaction.get(ds.reference);
       await transaction.update(freshSnap.reference, {'votes': freshSnap['votes'] + 1});
+
+      prefs.setBool('voted.' + ds['name'], true);
     });
   }
 
@@ -61,7 +76,7 @@ class _NameListWidgetStatus extends State<NameListWidget> {
                   child: new Row(
                     children: <Widget>[Expanded(child: Text(ds['name'])), Text(ds['votes'].toString())],
                   )),
-              onTap: () => _voteName(ds.reference, context, model),
+              onTap: () => _voteName(ds, context, model),
               //onLongPress: () => _deleteName(ds.reference, context, model),
             ),
           ),
