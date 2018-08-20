@@ -27,6 +27,59 @@ class _NameListWidgetStatus extends State<NameListWidget> {
     });
   }
 
+  _buildListItem(BuildContext context, DocumentSnapshot ds) {
+    return ScopedModelDescendant<AppStateModel>(
+      rebuildOnChange: false,
+      builder: (context, _, model) => Dismissible(
+            key: ValueKey(ds.documentID),
+            background: Container(color: Colors.red),
+            onDismissed: (direction) {
+              _deleteName(ds.reference, context, model);
+
+              String name = ds['name'];
+              Scaffold.of(context).showSnackBar(SnackBar(content: Text("$name deleted")));
+            },
+            child: BabyNameListTileWidget(ds: ds, model: model),
+          ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: StreamBuilder(
+            stream: Firestore.instance.collection('babies').orderBy("votes", descending: true).snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Text('Loading...');
+              }
+
+              return ListView.builder(
+                itemCount: snapshot.data.documents.length,
+                padding: EdgeInsets.only(top: 10.0),
+                itemExtent: 55.0,
+                itemBuilder: (context, index) => _buildListItem(context, snapshot.data.documents[index]),
+              );
+            }),
+      );
+}
+
+class BabyNameListTileWidget extends StatefulWidget {
+  final DocumentSnapshot ds;
+  final AppStateModel model;
+
+  BabyNameListTileWidget({Key key, @required this.ds, @required this.model}) : super(key: key);
+
+  @override
+  State<BabyNameListTileWidget> createState() => _BabyNameListTileState(ds['votes'].toString());
+}
+
+class _BabyNameListTileState extends State<BabyNameListTileWidget> {
+  String _vote = '';
+
+  _BabyNameListTileState(String currentVote) {
+    _vote = currentVote;
+  }
+
   _voteName(DocumentSnapshot ds, BuildContext context, AppStateModel appStateModel) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -49,6 +102,10 @@ class _NameListWidgetStatus extends State<NameListWidget> {
       return;
     }
 
+    setState(() {
+      _vote = (int.parse(_vote) + 1).toString();
+    });
+
     Firestore.instance.runTransaction((transaction) async {
       DocumentSnapshot freshSnap = await transaction.get(ds.reference);
       await transaction.update(freshSnap.reference, {'votes': freshSnap['votes'] + 1});
@@ -57,47 +114,16 @@ class _NameListWidgetStatus extends State<NameListWidget> {
     });
   }
 
-  _buildListItem(BuildContext context, DocumentSnapshot ds) {
-    return ScopedModelDescendant<AppStateModel>(
-      rebuildOnChange: false,
-      builder: (context, _, model) => Dismissible(
-            key: ValueKey(ds.documentID),
-            background: Container(color: Colors.red),
-            onDismissed: (direction) {
-              _deleteName(ds.reference, context, model);
-
-              String name = ds['name'];
-              Scaffold.of(context).showSnackBar(SnackBar(content: Text("$name deleted")));
-            },
-            child: ListTile(
-              title: Container(
-                  decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), borderRadius: BorderRadius.circular(5.0)),
-                  padding: EdgeInsets.all(10.0),
-                  child: new Row(
-                    children: <Widget>[Expanded(child: Text(ds['name'])), Text(ds['votes'].toString())],
-                  )),
-              onTap: () => _voteName(ds, context, model),
-              //onLongPress: () => _deleteName(ds.reference, context, model),
-            ),
-          ),
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Container(
+          decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), borderRadius: BorderRadius.circular(5.0)),
+          padding: EdgeInsets.all(10.0),
+          child: new Row(
+            children: <Widget>[Expanded(child: Text(widget.ds['name'])), Text(_vote)],
+          )),
+      onTap: () => _voteName(widget.ds, context, widget.model),
     );
   }
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-        child: StreamBuilder(
-            stream: Firestore.instance.collection('babies').orderBy("votes", descending: true).snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Text('Loading...');
-              }
-
-              return ListView.builder(
-                itemCount: snapshot.data.documents.length,
-                padding: EdgeInsets.only(top: 10.0),
-                itemExtent: 55.0,
-                itemBuilder: (context, index) => _buildListItem(context, snapshot.data.documents[index]),
-              );
-            }),
-      );
 }

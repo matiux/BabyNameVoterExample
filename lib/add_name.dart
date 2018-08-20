@@ -3,9 +3,11 @@ import 'package:baby_name_voter/widgets/row_connection_status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddNamePage extends StatelessWidget {
   static final String routeName = "/addname";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,10 +39,18 @@ class _MyInsertNameAppState extends State {
 
   String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-  void _saveName() {
+  void _saveName() async {
     if (_name.toLowerCase().trim().isEmpty) return;
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     final DocumentReference id = Firestore.instance.collection('babies').document(_name.toLowerCase().trim());
+
+    bool voted = prefs.getBool('voted.' + _name) ?? false;
+
+    if (voted) {
+      Navigator.pop(context, "Name already voted: $_name");
+      return;
+    }
 
     Firestore.instance.runTransaction((Transaction transaction) async {
       DocumentSnapshot freshSnap = await transaction.get(id);
@@ -54,6 +64,7 @@ class _MyInsertNameAppState extends State {
 
         Navigator.pop(context, "Baby name created: $_name");
       }
+      prefs.setBool('voted.' + _name, true);
     });
   }
 
