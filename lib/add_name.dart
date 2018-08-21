@@ -40,17 +40,19 @@ class _MyInsertNameAppState extends State {
   String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
   void _saveName() async {
-    if (_name.toLowerCase().trim().isEmpty) return;
+    String keyName = _name.toLowerCase().trim();
+    if (keyName.isEmpty) return;
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final DocumentReference id = Firestore.instance.collection('babies').document(_name.toLowerCase().trim());
 
-    bool voted = prefs.getBool('voted.' + _name) ?? false;
+    bool voted = prefs.getBool('voted.' + keyName) ?? false;
 
     if (voted) {
       Navigator.pop(context, "Name already voted: $_name");
       return;
     }
+
+    final DocumentReference id = Firestore.instance.collection('babies').document(keyName);
 
     Firestore.instance.runTransaction((Transaction transaction) async {
       DocumentSnapshot freshSnap = await transaction.get(id);
@@ -64,7 +66,7 @@ class _MyInsertNameAppState extends State {
 
         Navigator.pop(context, "Baby name created: $_name");
       }
-      prefs.setBool('voted.' + _name, true);
+      prefs.setBool('voted.' + keyName, true);
     });
   }
 

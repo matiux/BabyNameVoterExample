@@ -1,5 +1,4 @@
 import 'package:connectivity/connectivity.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -14,13 +13,12 @@ class AppStateModel extends Model {
 
   void _initConnectionState() async {
     try {
-      _connectionStatus =
-          _formatStatus((await _connectivity.checkConnectivity()).toString());
+      _connectionStatus = _formatStatus((await _connectivity.checkConnectivity()).toString());
       notifyListeners();
       _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
         _connectionStatus = _formatStatus(result.toString());
         notifyListeners();
-        debugPrint(_formatStatus(_connectionStatus));
+//        debugPrint(_formatStatus(_connectionStatus));
       });
     } on PlatformException catch (e) {
       _connectionStatus = 'Failed to get connectivity.';

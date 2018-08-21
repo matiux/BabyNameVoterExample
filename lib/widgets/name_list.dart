@@ -81,9 +81,10 @@ class _BabyNameListTileState extends State<BabyNameListTileWidget> {
   }
 
   _voteName(DocumentSnapshot ds, BuildContext context, AppStateModel appStateModel) async {
+    String keyName = ds['name'].toLowerCase().trim();
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    bool voted = prefs.getBool('voted.' + ds['name']) ?? false;
+    bool voted = prefs.getBool("voted.$keyName") ?? false;
 
     if (voted) {
       Scaffold.of(context).showSnackBar(SnackBar(
@@ -110,7 +111,7 @@ class _BabyNameListTileState extends State<BabyNameListTileWidget> {
       DocumentSnapshot freshSnap = await transaction.get(ds.reference);
       await transaction.update(freshSnap.reference, {'votes': freshSnap['votes'] + 1});
 
-      prefs.setBool('voted.' + ds['name'], true);
+      prefs.setBool("voted.$keyName", true);
     });
   }
 
