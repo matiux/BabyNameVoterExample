@@ -45,10 +45,12 @@ class _NameListPageState extends State<NameListPage> {
     await SharedPreferences.getInstance()
       ..clear();
 
-    Scaffold.of(context).showSnackBar(SnackBar(
-      content: Text('Votes canceled'),
-      duration: Duration(seconds: 1),
-    ));
+    Scaffold.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text('Votes canceled'),
+        duration: Duration(seconds: 1),
+      ));
   }
 
   _navigateAndDisplayInfo(BuildContext context) async {
@@ -59,10 +61,12 @@ class _NameListPageState extends State<NameListPage> {
     final result = await Navigator.pushNamed(context, AddNamePage.routeName);
 
     if ("null" != result.toString()) {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text("$result"),
-        duration: Duration(seconds: 2),
-      ));
+      Scaffold.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text("$result"),
+          duration: Duration(seconds: 2),
+        ));
     }
   }
 

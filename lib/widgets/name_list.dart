@@ -14,10 +14,12 @@ class NameListWidget extends StatefulWidget {
 class _NameListWidgetStatus extends State<NameListWidget> {
   _deleteName(DocumentReference dr, BuildContext context, AppStateModel appStateModel) {
     if ("ConnectivityResult.none" == appStateModel.connectionStatus()) {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text("No internet connection"),
-        duration: Duration(milliseconds: 1000),
-      ));
+      Scaffold.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text("No internet connection"),
+          duration: Duration(milliseconds: 1000),
+        ));
 
       return;
     }
@@ -37,7 +39,9 @@ class _NameListWidgetStatus extends State<NameListWidget> {
               _deleteName(ds.reference, context, model);
 
               String name = ds['name'];
-              Scaffold.of(context).showSnackBar(SnackBar(content: Text("$name deleted")));
+              Scaffold.of(context)
+                ..removeCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text("$name deleted")));
             },
             child: BabyNameListTileWidget(ds: ds, model: model),
           ),
@@ -87,18 +91,23 @@ class _BabyNameListTileState extends State<BabyNameListTileWidget> {
     bool voted = prefs.getBool("voted.$keyName") ?? false;
 
     if (voted) {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text("Hai già votato " + ds['name']),
-        duration: Duration(milliseconds: 1000),
-      ));
+      Scaffold.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text("Hai già votato " + ds['name']),
+          duration: Duration(milliseconds: 1000),
+        ));
+
       return;
     }
 
     if ("ConnectivityResult.none" == appStateModel.connectionStatus()) {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text("No internet connection"),
-        duration: Duration(milliseconds: 1000),
-      ));
+      Scaffold.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text("No internet connection"),
+          duration: Duration(milliseconds: 1000),
+        ));
 
       return;
     }

@@ -90,10 +90,12 @@ class _MyInsertNameAppState extends State {
                       if ("Connection status: none" != model.connectionStatus()) {
                         _saveName();
                       } else {
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                          content: Text(model.connectionStatus()),
-                          duration: Duration(seconds: 2),
-                        ));
+                        Scaffold.of(context)
+                          ..removeCurrentSnackBar()
+                          ..showSnackBar(SnackBar(
+                            content: Text(model.connectionStatus()),
+                            duration: Duration(seconds: 2),
+                          ));
                       }
                     },
                   ),
