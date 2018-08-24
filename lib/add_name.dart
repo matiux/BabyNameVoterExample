@@ -14,10 +14,7 @@ class AddNamePage extends StatelessWidget {
         appBar: AppBar(title: Text('Add baby name')),
         body: Container(
           child: Column(
-            children: <Widget>[
-              ScopedModelDescendant<AppStateModel>(builder: (context, child, model) => RowConnectionStateWidget(state: model.connectionStatus())),
-              MyInsertNameApp(),
-            ],
+            children: <Widget>[RowConnectionStateWidget(), MyInsertNameApp()],
           ),
         ));
   }
@@ -84,6 +81,7 @@ class _MyInsertNameAppState extends State {
               decoration: InputDecoration(hintText: 'Please enter a baby name'),
             ),
             ScopedModelDescendant<AppStateModel>(
+              rebuildOnChange: false,
               builder: (context, child, model) => RaisedButton(
                     child: Text('Save'),
                     onPressed: () {

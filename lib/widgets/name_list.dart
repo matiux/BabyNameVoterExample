@@ -12,18 +12,7 @@ class NameListWidget extends StatefulWidget {
 }
 
 class _NameListWidgetStatus extends State<NameListWidget> {
-  _deleteName(DocumentReference dr, BuildContext context, AppStateModel appStateModel) {
-    if ("ConnectivityResult.none" == appStateModel.connectionStatus()) {
-      Scaffold.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(SnackBar(
-          content: Text("No internet connection"),
-          duration: Duration(milliseconds: 1000),
-        ));
-
-      return;
-    }
-
+  _deleteName(DocumentReference dr, BuildContext context) {
     Firestore.instance.runTransaction((transaction) async {
       await transaction.delete(dr);
     });
@@ -31,12 +20,22 @@ class _NameListWidgetStatus extends State<NameListWidget> {
 
   _buildListItem(BuildContext context, DocumentSnapshot ds) {
     return ScopedModelDescendant<AppStateModel>(
-      rebuildOnChange: false,
+      //rebuildOnChange: false,
       builder: (context, _, model) => Dismissible(
             key: ValueKey(ds.documentID),
             background: Container(color: Colors.red),
             onDismissed: (direction) {
-              _deleteName(ds.reference, context, model);
+              if ("Connection status: none" == model.connectionStatus()) {
+                Scaffold.of(context)
+                  ..removeCurrentSnackBar()
+                  ..showSnackBar(SnackBar(
+                    content: Text("No internet connection"),
+                    duration: Duration(milliseconds: 1000),
+                  ));
+
+                return;
+              }
+              _deleteName(ds.reference, context);
 
               String name = ds['name'];
               Scaffold.of(context)

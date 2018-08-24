@@ -1,15 +1,14 @@
+import 'package:baby_name_voter/app_state.dart';
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class RowConnectionStateWidget extends StatefulWidget {
-  final String state;
+//  final String state;
 
-  RowConnectionStateWidget({Key key, @required this.state})
-      : assert(state.isNotEmpty);
+//  RowConnectionStateWidget({Key key, @required this.state}) : assert(state.isNotEmpty);
 
   @override
-  State<StatefulWidget> createState() {
-    return _RowConnectionStateWidgetState();
-  }
+  State<StatefulWidget> createState() => _RowConnectionStateWidgetState();
 }
 
 class _RowConnectionStateWidgetState extends State<RowConnectionStateWidget> {
@@ -22,12 +21,14 @@ class _RowConnectionStateWidgetState extends State<RowConnectionStateWidget> {
         children: <Widget>[
           Expanded(
             child: Center(
-              child: Text(
-                widget.state,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: ScopedModelDescendant<AppStateModel>(
+                builder: (context, child, model) => Text(
+                      model.connectionStatus(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
               ),
             ),
           )

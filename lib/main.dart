@@ -103,25 +103,14 @@ class _NameListPageState extends State<NameListPage> {
     }
 
     return Scaffold(
-      floatingActionButton: Builder(
-        builder: (BuildContext context) => _renderSpeedDial(context),
-      ),
-//      floatingActionButton: Builder(
-//        builder: (BuildContext context) => FloatingActionButton(
-//            child: Text('+', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
-//            onPressed: () {
-//              _navigateAndDisplayInfo(context);
-//            }),
-//      ),
+      floatingActionButton: Builder(builder: (BuildContext context) => _renderSpeedDial(context)),
       appBar: AppBar(title: Text(widget.title)),
       body: Container(
-        child: ScopedModelDescendant<AppStateModel>(
-          builder: (context, _, model) => Column(
-                children: <Widget>[
-                  RowConnectionStateWidget(state: model.connectionStatus()),
-                  NameListWidget(),
-                ],
-              ),
+        child: Column(
+          children: <Widget>[
+            RowConnectionStateWidget(),
+            NameListWidget(),
+          ],
         ),
       ),
     );
